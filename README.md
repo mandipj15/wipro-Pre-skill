@@ -1,1 +1,1 @@
-# wipro-Pre-skill
+http://tinyurl.com/downloadadminstudio
