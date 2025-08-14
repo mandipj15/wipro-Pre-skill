@@ -1,1 +1,32 @@
 http://tinyurl.com/downloadadminstudio
+
+
+# AdminStudio Server Preparation Script for Windows Server 2022
+# Author: Copilot for Az | Purpose: Install required roles/features for AdminStudio
+
+# Ensure script runs with elevated privileges
+if (-not ([Security.Principal.WindowsPrincipal] [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(`
+    [Security.Principal.WindowsBuiltInRole] "Administrator")) {
+    Write-Warning "Please run this script as Administrator."
+    exit
+}
+# Enable required Windows Features
+$features = @(
+    "NET-Framework-Features",       # .NET Framework 3.5 (includes 2.0)
+    "NET-Framework-45-Features",    # .NET Framework 4.8
+    "RSAT",                         # Remote Server Administration Tools
+    "ServerManager-Core-RSAT",     # Server Manager RSAT tools
+    "Web-Server",                   # IIS Web Server (optional for web-based cataloging)
+    "Web-Mgmt-Console",             # IIS Management Console
+    "MSMQ-Server",                  # Message Queuing (used by some packaging workflows)
+    "WAS",                          # Windows Process Activation Service
+    "WAS-ProcessModel",             # WAS Process Model
+    "WAS-NetFxEnvironment",         # WAS .NET Environment
+    "WAS-Config-APIs"               # WAS Configuration APIs
+)
+foreach ($feature in $features) {
+    Write-Host "Installing feature: $feature"
+    Install-WindowsFeature -Name $feature -IncludeManagementTools -ErrorAction SilentlyContinue
+}
+
+Write-Host "`n✅ All required features installed. You may now proceed with AdminStudio installation."
