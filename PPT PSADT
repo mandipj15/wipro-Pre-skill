@@ -1,3 +1,11 @@
+Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+
+
+
+
+
+
 Got it 👍 Let me show you step by step where you need to apply your tasks inside the PSADT v4 Deploy-Application.ps1 file.
 
 I’ll give you two things:
