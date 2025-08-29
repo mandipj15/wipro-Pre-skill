@@ -1,6 +1,8 @@
 Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 
+# Example test actions
+Show-InstallationPrompt -Message "PSADT Script Started Successfully!" -ButtonRightText "OK"
 
 
 
