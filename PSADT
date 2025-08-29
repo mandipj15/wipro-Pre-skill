@@ -1,0 +1,31 @@
+# Run this inside your PSADT root folder
+@'
+<#
+.SYNOPSIS
+    Example PSADT deployment script
+#>
+
+## Import Toolkit
+Import-Module "$PSScriptRoot\AppDeployToolkit\AppDeployToolkitMain.ps1"
+
+If ($DeploymentType -eq 'Install') {
+    ## Install MSI
+    Execute-MSI -Action Install -Path "Files\MyApp.msi"
+
+    ## Example: Create Folder
+    New-Item -ItemType Directory -Path "C:\MyAppFolder" -Force
+
+    ## Example: Move Folder
+    Move-Item -Path "C:\Temp\OldData" -Destination "C:\MyAppFolder" -Force -ErrorAction SilentlyContinue
+
+    ## Example: Delete Folder
+    Remove-Item -Path "C:\Temp\Unwanted" -Recurse -Force -ErrorAction SilentlyContinue
+}
+ElseIf ($DeploymentType -eq 'Uninstall') {
+    ## Uninstall MSI
+    Execute-MSI -Action Uninstall -Path "Files\MyApp.msi"
+
+    ## Example: Remove Folder
+    Remove-Item -Path "C:\MyAppFolder" -Recurse -Force -ErrorAction SilentlyContinue
+}
+'@ | Out-File -FilePath ".\Deploy-Application.ps1" -Encoding UTF8
