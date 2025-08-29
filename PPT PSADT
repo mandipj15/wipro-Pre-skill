@@ -1,0 +1,95 @@
+Got it 👍 Let me show you step by step where you need to apply your tasks inside the PSADT v4 Deploy-Application.ps1 file.
+
+I’ll give you two things:
+
+A minimal skeleton version (only what you need for MSI + folder ops).
+
+Clear labels showing where to put your tasks.
+
+1. Minimal Skeleton – Deploy-Application.ps1
+[CmdletBinding()]
+param (
+    [ValidateSet('Install','Uninstall','Repair')]
+    [string]$DeploymentType = 'Install',
+
+    [ValidateSet('Interactive','Silent','NonInteractive')]
+    [string]$DeployMode = 'Interactive'
+)
+
+$adtSession = @{
+    DirFiles = Join-Path $PSScriptRoot 'Files'  # Where your MSI & files go
+}
+
+#region Install
+function Install-ADTDeployment {
+    
+    Pre-Install {
+        ## STEP 1 – Create folder(s)
+        New-Item -Path 'C:\MyAppTemp' -ItemType Directory -Force | Out-Null
+    }
+
+    Install {
+        ## STEP 2 – Install MSI
+        Execute-MSI -Action Install -Path "$($adtSession.DirFiles)\MyAppInstaller.msi"
+    }
+
+    Post-Install {
+        ## STEP 3 – Move folders/files
+        Move-Item -Path 'C:\MyAppTemp' -Destination 'C:\Program Files\MyApp' -Force
+
+        ## STEP 4 – Delete old folder(s)
+        Remove-ADTFolder -Path 'C:\OldMyAppFolder'
+    }
+}
+#endregion
+
+#region Uninstall
+function Uninstall-ADTDeployment {
+    Uninstall {
+        ## Uninstall MSI
+        Execute-MSI -Action Uninstall -Path 'C:\Program Files\MyApp\MyAppInstaller.msi'
+    }
+
+    Post-Uninstall {
+        ## Remove leftover folder
+        Remove-ADTFolder -Path 'C:\Program Files\MyApp'
+    }
+}
+#endregion
+
+#region Entry
+try {
+    switch ($DeploymentType) {
+        'Install'   { Install-ADTDeployment }
+        'Uninstall' { Uninstall-ADTDeployment }
+        'Repair'    { Write-Verbose "Repair not implemented" }
+    }
+}
+catch {
+    Write-Error $_
+    exit 1
+}
+#endregion
+
+2. Where to Apply What (Important 🔑)
+
+Place your MSI → in the Files folder (same location as this script). Example: .\Files\MyAppInstaller.msi
+
+STEP 1 (Pre-Install) → put any folder create / file copy commands here.
+
+STEP 2 (Install) → always put your MSI installation here.
+
+STEP 3 (Post-Install) → put move/rename operations here.
+
+STEP 4 (Post-Install / Post-Uninstall) → put cleanup/delete here.
+
+Uninstall section → only handles uninstall + cleanup tasks.
+
+👉 So in short:
+
+Task	Where to put it
+Create folder	Pre-Install
+Copy files / prepare temp	Pre-Install
+Install MSI	Install
+Move files/folders	Post-Install
+Delete old folders/files	Post-Install or Post-Uninstall
